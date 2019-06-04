@@ -1,0 +1,5 @@
+            while True:
+                line = log.readline().strip()
+                print(line)
+                if not line:
+                    break

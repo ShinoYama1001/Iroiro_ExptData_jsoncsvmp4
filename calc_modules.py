@@ -11,6 +11,11 @@ def calc_area(points):
             area += points[i]['x']*points[i+1]['y'] - points[i+1]['x']*points[i]['y']
     return abs(area)*0.5
 
+#二点間の距離を求める
+def calc_distance(points):
+    x_dis = points[0]['x'] - points[1]['x']
+    y_dis = points[0]['y'] - points[1]['y']
+    return (x_dis**2 + y_dis**2) ** 0.5
 
 
 if __name__ == "__main__":
@@ -19,12 +24,13 @@ if __name__ == "__main__":
     b = {'x':4, 'y':1}
     c = {'x':6, 'y':0}
 
-    point_2 = [o,a,b]
-    point_2r = [b,a,o]
-    point_3 = [o,a,b,c]
-    point_3r = [c,b,a,o]
+    point_4 = [o,a,b,c]
+    point_4r = [c,b,a,o]
 
-    print calc_area(point_2)
-    print calc_area(point_2r)
-    print calc_area(point_3)
-    print calc_area(point_3r)
+    print calc_area(point_4)
+    print calc_area(point_4r)
+
+    print ''
+
+    print calc_distance([o,a])
+    print calc_distance([o,c])

@@ -4,6 +4,9 @@ import os
 import json
 import cv2
 import numpy as np
+import math
+
+import calc_modules
 
 class json_to_mp4:
 
@@ -29,6 +32,51 @@ class json_to_mp4:
         for mark in landmarks:
             cv2.circle(frame, (int(landmarks[mark]['x']),int(landmarks[mark]['y'])), 1, (0,0,255), -1)
 
+    #試し書き用関数
+    def write_something(self, frame, landmarks):
+        #口の外側面積
+        mouth_out = []
+        mouth_out.append(landmarks["mouth_left_corner"])
+        mouth_out.append(landmarks["mouth_lower_lip_left_contour2"])
+        mouth_out.append(landmarks["mouth_lower_lip_right_contour3"])
+        mouth_out.append(landmarks["mouth_lower_lip_bottom"])
+        mouth_out.append(landmarks["mouth_lower_lip_right_contour3"])
+        mouth_out.append(landmarks["mouth_lower_lip_right_contour2"])
+        mouth_out.append(landmarks["mouth_right_corner"])
+        mouth_out.append(landmarks["mouth_upper_lip_right_contour2"])
+        mouth_out.append(landmarks["mouth_upper_lip_right_contour1"])
+        mouth_out.append(landmarks["mouth_upper_lip_top"])
+        mouth_out.append(landmarks["mouth_upper_lip_left_contour1"])
+        mouth_out.append(landmarks["mouth_upper_lip_left_contour2"])
+        mouth_outarea = calc_modules.calc_area(mouth_out)
+        mouth_outarea = mouth_outarea*10000 / calc_modules.calc_distance([landmarks["nose_contour_left1"], landmarks["nose_contour_right1"]])**2
+        r = int((mouth_outarea / math.pi) ** 0.5)
+        cv2.circle(frame, (self.x_max-100, 200), r, (255,0,0), -1)
+
+        #目の面積平均
+        eye_right = []
+        eye_right.append(landmarks["right_eye_left_corner"])
+        eye_right.append(landmarks["right_eye_lower_left_quarter"])
+        eye_right.append(landmarks["right_eye_bottom"])
+        eye_right.append(landmarks["right_eye_lower_right_quarter"])
+        eye_right.append(landmarks["right_eye_right_corner"])
+        eye_right.append(landmarks["right_eye_upper_right_quarter"])
+        eye_right.append(landmarks["right_eye_top"])
+        eye_right.append(landmarks["right_eye_upper_left_quarter"])
+        eye_left = []
+        eye_left.append(landmarks["left_eye_left_corner"])
+        eye_left.append(landmarks["left_eye_lower_left_quarter"])
+        eye_left.append(landmarks["left_eye_bottom"])
+        eye_left.append(landmarks["left_eye_lower_right_quarter"])
+        eye_left.append(landmarks["left_eye_right_corner"])
+        eye_left.append(landmarks["left_eye_upper_right_quarter"])
+        eye_left.append(landmarks["left_eye_top"])
+        eye_left.append(landmarks["left_eye_upper_left_quarter"])
+        eye_area = (calc_modules.calc_area(eye_right)+calc_modules.calc_area(eye_left))*0.5
+        eye_area = eye_area*10000 / calc_modules.calc_distance([landmarks["nose_contour_left1"], landmarks["nose_contour_right1"]])**2
+        r = int((eye_area / math.pi) ** 0.5)
+        cv2.circle(frame, (self.x_max-100, 300), r, (0,255,0), -1)
+
     def main(self):
         for person in self.persons:
             #jsonから漫画読んだ順を取得しておく
@@ -52,12 +100,13 @@ class json_to_mp4:
                             js = json.load(j)
                             if len(js["faces"]) == 1:
                                 #関数使おう
-                                self.mark_landmarks(frame, js["faces"][0]["landmark"])
+                                self.mark_landmarks(frame, js["faces"][0]["landmark"]) #顔特徴点書き込み
+                                self.write_something(frame, js["faces"][0]["landmark"]) #試しに口の面積書き込み
 
-
-                        out.write(frame)
-                        #cv2.imshow("",frame)
-                        #cv2.waitKey(0)
+                        #表示するか保存するか選べ
+                        #out.write(frame)
+                        cv2.imshow("",frame)
+                        cv2.waitKey(0)
                     else:
                         break
 
